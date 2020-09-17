@@ -2,14 +2,25 @@
   <div class="login">
     <div class="container">
       <img src="../assets/avatar.jpg" alt class="avatar" />
+
       <el-form :model="user" :rules="rules" ref="user" class="demo-ruleForm">
         <el-form-item prop="username">
-          <el-input v-model="user.username" prefix-icon="el-icon-user-solid" placeholder="请输入用户名"></el-input>
+          <el-input placeholder="请输入用户名"
+            v-model="user.username"
+             prefix-icon="el-icon-user-solid"
+            @focus="myfocus('username')">
+        </el-input>
         </el-form-item>
+
         <el-form-item prop="password">
-          <el-input v-model="user.password" prefix-icon="el-icon-key" placeholder="请输入密码"></el-input>
+          <el-input  placeholder="请输入密码"
+            v-model="user.password"
+            prefix-icon="el-icon-key"
+            @focus="myfocus('password')">
+          </el-input>
         </el-form-item>
       </el-form>
+
       <el-button type="primary" class="login-btn" @click="myclick">登录</el-button>
     </div>
   </div>
@@ -22,8 +33,8 @@ export default {
   data() {
     return {
       user: {
-        username: "",
-        password: "",
+        username: "10086",
+        password: "123",
       },
       rules: {
         username: [
@@ -36,22 +47,29 @@ export default {
   },
   methods: {
     myclick() {
-      this.$refs.user.validate(async (valid, obj) => {
+      // 先进行用户输入的验证==二次验证，只有通过验证才会进行登录的提交
+        this.$refs.user.validate(async (valid, obj) => {
         // console.log(valid, obj);
         if (valid) {
-          let res = await login(this.user);
+          let res = await login(this.user); // 获取请求数据
           console.log(res);
-          if (res.data.statusCode == 401) {
+          if (res.data.statusCode == 401) {  
             this.$message.error(res.data.message);
           } else {
             this.$message.success(res.data.message);
+            localStorage.setItem("hotai_52",res.data.data.token) // 存储token
+            this.$router.push({path:"/index"})
           }
         }else{
           this.$message({message:"数据输入不合法", type:"warning"})
           return false
         }
+
       });
     },
+     myfocus(name){
+        this.$refs.user.clearValidate(name);
+      }
   },
 };
 </script>
